@@ -1,0 +1,157 @@
+/* import the required styles */
+@import '@braks/vue-flow/dist/style.css';
+
+/* import the default theme (optional) */
+@import '@braks/vue-flow/dist/theme-default.css';
+
+body {
+  color: #111;
+  padding: 5px;
+  background-color: #222;
+  margin: 0;
+  padding: 0;
+}
+
+#app {
+  text-transform: uppercase;
+  font-weight: 600;
+  font-family: 'JetBrains Mono', monospace;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-align: center;
+  color: #2c3e50;
+}
+
+html,
+body,
+#app {
+  margin: 0;
+  height: 100%;
+}
+
+.save__controls {
+  position: absolute;
+  right: 10px;
+  top: 10px;
+  z-index: 4;
+  font-size: 12px;
+}
+
+.save__controls button {
+  margin-left: 5px;
+}
+
+.dndflow {
+  flex-direction: column;
+  display: flex;
+  height: 100%;
+}
+
+.hidemenu {
+  z-index: 10;
+  display:flex;
+  flex-direction: column;
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  column-gap: 15px;
+  background: #e6e6e6;
+  padding-right: 5px;
+}
+
+.hidemenu > container {
+  
+  max-height: 100vh;
+  overflow-y: auto;
+}
+
+.sidemenu {
+  display: flex;
+  flex-direction: column;
+  position: absolute;
+  bottom: 15px;
+  right: 15px;
+  column-gap: 15px;
+}
+
+.sidemenu.left {
+  right: 225px;
+}
+
+aside {
+  border-left: 1px solid #eee;
+  padding: 15px 10px;
+  font-size: 12px;
+  background: #fcfcfc;
+  z-index: 5;
+  margin-top: 15px;
+  border-radius: 10px;
+}
+
+ aside > * {
+  margin-bottom: 10px !important;
+  cursor: grab;
+} 
+
+ aside .description {
+  margin-bottom: 10px;
+}
+
+ .vue-flow-wrapper {
+  flex-grow: 1;
+  height: 100%;
+}
+
+@media screen and (min-width: 768px) {
+  .dndflow {
+    flex-direction: row;
+  }
+
+  aside {
+    max-width: 180px;
+    border-top: 1px solid #eee;
+  }
+}
+
+
+
+.vue-flow__node-npcNode {
+  min-width: 150px;
+  background: #9CA8B3;
+  color: #fff;
+  padding: 10px;
+  border-radius: 10px;
+}
+
+.vue-flow__node-playerNode {
+  min-width: 150px;
+  background: #9CA8B3;
+  color: #fff;
+  padding: 10px;
+  border: 1px solid blue;
+  border-radius: 10px;
+}
+
+.player1{
+  color: white !important;
+  background-color: rgb(16, 29, 85) !important;
+  border: 1px solid rgb(9, 17, 51) !important;
+}
+
+.player2{
+  color: white !important;
+  background-color: rgb(1, 94, 58) !important;
+  border: 1px solid rgb(0, 53, 33) !important;
+}
+
+.playerAll{
+  color: white !important;
+  background-color: rgb(114, 0, 114) !important;
+  border: 1px solid rgb(54, 0, 54) !important;
+}
+
+.npc {
+  color: white !important;
+  background-color: rgb(192, 25, 25) !important;
+  border: 1px solid rgb(104, 12, 12) !important;
+}
