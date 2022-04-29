@@ -7,6 +7,7 @@ interface PlayerNodeProps extends NodeProps {
   data: {
     texts: Array<string>
     playerType: string
+    fullfilsQuest: Boolean
     onChange: (event: any) => void
     onConnect: (params: Connection | Edge) => void
   }
@@ -44,6 +45,7 @@ export default {
 }
 </script>
 <template>
+  <div style="position:relative;">
   <Handle type="target" id="gi1" :position="Position.Left" :style="targetHandleStyle" :on-connect="props.data.onConnect" />
   <Handle type="source" id="go1" :position="Position.Right" :style="targetHandleStyle" :on-connect="props.data.onConnect" />
   <div>
@@ -68,9 +70,21 @@ export default {
   </ul>
   <br>
   <button @click="addText">Add response</button>
+  <div class="footer" v-if="props.data.fullfilsQuest">Fullfils Quest</div>
+  </div>
 </template>
 
 <style scoped>
+.footer {
+  position: absolute;
+  bottom: -60px;
+  color: rgb(0, 255, 34);
+  border: 1px solid green;
+  border-radius: 10px;
+  padding: 10px;
+  left: 15px;
+}
+
 ul {
   list-style-type: none;
   margin: 0;

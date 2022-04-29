@@ -10,11 +10,10 @@ import * as types from '../types'
 
 const initialElements: Elements = []
 
-
 let id = 0
 const getId = () => `node_${id++}`
 
-const { instance, onConnect, nodes, edges, addEdges, addNodes, onEdgesChange, onNodesChange } = useVueFlow()
+const { instance, onConnect, nodes, edges, addEdges, addNodes,setNodes, setEdges, onEdgesChange, onNodesChange } = useVueFlow()
 
 let selectedDialogIndex : Ref<number | null> = ref(null)
 
@@ -28,6 +27,7 @@ const getNodeID = () :number | null => {
 
 onNodesChange((params) =>
 {
+  console.log(params)
   params.forEach((value: NodeChange) => {
     if(Scenario.value != null && selectedDialogIndex.value != null)
     {
@@ -45,6 +45,11 @@ onNodesChange((params) =>
         let index = Scenario.value.conversations[selectedDialogIndex.value as number].nodes.findIndex(function(el) {return el.id == value.id});
         Scenario.value.conversations[selectedDialogIndex.value as number].nodes.splice(index, 1)
       }
+      /*else if(value.type === 'select' && value.selected)
+      {
+        let index = Scenario.value.conversations[selectedDialogIndex.value as number].nodes.findIndex(function(el) {return el.id == value.id});
+        Scenario.value.conversations[selectedDialogIndex.value as number].nodes[index].data.fullfilsQuest = !Scenario.value.conversations[selectedDialogIndex.value as number].nodes[index].data.fullfilsQuest
+      }*/
     }
   })
 })
@@ -93,7 +98,7 @@ const onDrop = (event: DragEvent) => {
       id: getId(),
       type,
       class: nodeClass,
-      data: {onChange, onConnect, name:npcName, texts:[], playerType: nodeClass},
+      data: {onChange, onConnect, name:npcName, texts:[], playerType: nodeClass, fullfilsQuest: false},
       connectable: true,
       position,
       label: `${type} node`,
@@ -101,7 +106,7 @@ const onDrop = (event: DragEvent) => {
     addNodes([newNode])
 
     let nodeId = "node" + getNodeID()
-    let node = new types.ConversationNode(nodeId, new types.NodePosition(event.clientX, event.clientY -40), type, nodeClass, new types.NodeData(npcName, nodeClass,[]))
+    let node = new types.ConversationNode(nodeId, new types.NodePosition(event.clientX, event.clientY -40), type, nodeClass, new types.NodeData(npcName, nodeClass,[], false))
     Scenario.value?.conversations[selectedDialogIndex.value as number].nodes.push(node)
   }
 }
@@ -113,10 +118,14 @@ const nodeTypes = {
 
 const Scenario: Ref<types.Scenario | null> = ref(null)
 
+const sideBar = ref(null);
+
 const jsonFileLoaded = (scenario : types.Scenario) => {
+  Scenario.value = null
   Scenario.value = scenario
   
   selectedDialogIndex.value = null
+  sideBar.value?.reset();
 }
 
 const dialogSelected = (index: number) => {
@@ -130,7 +139,7 @@ const elements = ref(initialElements)
     <VueFlow v-model="elements" @dragover="onDragOver" :node-types="nodeTypes">
       <Background :variant="BackgroundVariant.Lines" pattern-color="#4d4d4d" gap="25" />
       <Controls :scenario=Scenario v-on:json-file-loaded="jsonFileLoaded" />
-      <Sidebar :scenario=Scenario v-on:dialog-selected="dialogSelected" />
+      <Sidebar :scenario=Scenario v-on:dialog-selected="dialogSelected" ref="sideBar"/>
     </VueFlow>
   </div>
 </template>

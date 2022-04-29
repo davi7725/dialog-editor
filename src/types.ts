@@ -3,11 +3,13 @@ export class NodeData {
     name!: string;
     playerType!: string;
     texts!: Array<string>;
+    fullfilsQuest!: Boolean;
 
-    constructor(name: string, playerType: string, texts: Array<string>) {
+    constructor(name: string, playerType: string, texts: Array<string>, fullfilsQuest: Boolean) {
       this.name = name;
       this.playerType = playerType;
       this.texts = texts;
+      this.fullfilsQuest = fullfilsQuest;
     }
   }
   

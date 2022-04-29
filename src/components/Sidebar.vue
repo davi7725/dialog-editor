@@ -20,10 +20,20 @@ let selectedDialogIndex : Ref<number | null>  = ref(null)
 let currentActors : Ref<Array<string> | null> = ref(null)
 
 const props = defineProps({
-  scenario: types.Scenario 
+  scenario: types.Scenario
 })
 
 const emit = defineEmits(['dialogSelected'])
+
+
+const reset = () => {
+  selectedDialog = null
+  selectedDialogIndex.value = null
+  setNodes([])
+  setEdges([])
+}
+
+defineExpose({ reset });
 
 const setDialog = (dialog: types.Conversation, index: number) => {
   console.log(selectedDialogIndex)

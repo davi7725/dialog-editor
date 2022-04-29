@@ -50,7 +50,6 @@ export default {
     let files =
       (event as HTMLInputEvent).target.files
     if (files == null || !files.length) return
-
     this.doSomethingWithTheFile(files[0])
   },
   

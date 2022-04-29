@@ -155,3 +155,7 @@ aside {
   background-color: rgb(192, 25, 25) !important;
   border: 1px solid rgb(104, 12, 12) !important;
 }
+
+.vue-flow__edge-path {
+  stroke-width: 5 !important;
+}
