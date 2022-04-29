@@ -4,6 +4,7 @@ import vue from '@vitejs/plugin-vue'
 import AutoImport from 'unplugin-auto-import/vite'
 
 export default defineConfig({
+  base: '/dialog-editor/',
   resolve: {
     alias: {
       '~': resolve('src'),
