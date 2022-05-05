@@ -58,7 +58,7 @@ export default {
 
     if(this.$props.scenario != null)
     {
-      var blob = new Blob([JSON.stringify(this.$props.scenario)], { type: "text/plain;charset=utf-8" })
+      var blob = new Blob([JSON.stringify(this.$props.scenario)], { type: "application/json" })
       saveAs(blob, filename);
     }
   },

@@ -1,20 +1,19 @@
 <script lang="ts" setup>
 import Controls from './Controls.vue'
-import { VueFlow, Elements, useVueFlow, BackgroundVariant, Background, MiniMap, EdgeChange, NodeChange } from '@braks/vue-flow'
+import { VueFlow, Elements, useVueFlow, BackgroundVariant, Background, MiniMap, EdgeChange, NodeChange, CoordinateExtent } from '@braks/vue-flow'
 import Sidebar from './Sidebar.vue'
 import NPCNode from './NPCNode.vue'
 import PlayerNode from './PlayerNode.vue'
 import { Ref } from 'vue'
-
 import * as types from '../types'
 
 const initialElements: Elements = []
 
+
+const { instance, onConnect, nodes, edges, addEdges, addNodes,setNodes, setEdges, onEdgesChange, onNodesChange, setTranslateExtent, setState } = useVueFlow()
+
 let id = 0
-const getId = () => `node_${id++}`
-
-const { instance, onConnect, nodes, edges, addEdges, addNodes,setNodes, setEdges, onEdgesChange, onNodesChange } = useVueFlow()
-
+const getId = () => `node${id++}`
 let selectedDialogIndex : Ref<number | null> = ref(null)
 
 const getNodeID = () :number | null => {
@@ -90,23 +89,24 @@ const onChange = (event: Event) => {
 
 const onDrop = (event: DragEvent) => {
   if (instance.value) {
+    const nodeId = getId()
+    const texts: Array<string> = []
     const type = event.dataTransfer?.getData('application/vueflow') as string
     const nodeClass = event.dataTransfer?.getData('application/nodeClass') as string
     const npcName = event.dataTransfer?.getData('application/npcName') as string
     const position = instance.value.project({ x: event.clientX, y: event.clientY - 40 })
     const newNode = {
-      id: getId(),
+      id: nodeId,
       type,
       class: nodeClass,
-      data: {onChange, onConnect, name:npcName, texts:[], playerType: nodeClass, fullfilsQuest: false},
+      data: {onChange, onConnect, name:npcName, texts:texts, playerType: nodeClass, fullfilsQuest: false},
       connectable: true,
       position,
       label: `${type} node`,
     } as unknown as Node
     addNodes([newNode])
 
-    let nodeId = "node" + getNodeID()
-    let node = new types.ConversationNode(nodeId, new types.NodePosition(event.clientX, event.clientY -40), type, nodeClass, new types.NodeData(npcName, nodeClass,[], false))
+    let node = new types.ConversationNode(nodeId, new types.NodePosition(event.clientX, event.clientY -40), type, nodeClass, new types.NodeData(npcName, nodeClass,texts, false))
     Scenario.value?.conversations[selectedDialogIndex.value as number].nodes.push(node)
   }
 }
@@ -130,6 +130,23 @@ const jsonFileLoaded = (scenario : types.Scenario) => {
 
 const dialogSelected = (index: number) => {
   selectedDialogIndex.value = index
+  id = Number(Scenario.value?.conversations[index].nodes.length) + 1;
+
+  /*const node = Scenario.value?.conversations[index].nodes[0]
+
+  //document.getElementsByClassName('.vue-flow__transformationpane').style.transform = "translate(100px, 100px)"
+  const coord: CoordinateExtent = [
+    [0, 0],
+    [100, 100],
+  ]
+
+   const coord2: CoordinateExtent = [
+    [Number.NEGATIVE_INFINITY, Number.NEGATIVE_INFINITY],
+    [Number.POSITIVE_INFINITY, Number.POSITIVE_INFINITY],
+  ]
+  setState({viewport: {x:0, y:0, zoom:1}})
+  setTranslateExtent(coord)
+  setTranslateExtent(coord2)*/
 }
 
 const elements = ref(initialElements)
