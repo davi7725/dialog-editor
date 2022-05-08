@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import Controls from './Controls.vue'
-import { VueFlow, Elements, useVueFlow, BackgroundVariant, Background, MiniMap, EdgeChange, NodeChange, CoordinateExtent } from '@braks/vue-flow'
+import { VueFlow, Elements, useVueFlow, BackgroundVariant, Background, MiniMap, EdgeChange, NodeChange, CoordinateExtent,useZoomPanHelper } from '@braks/vue-flow'
 import Sidebar from './Sidebar.vue'
 import NPCNode from './NPCNode.vue'
 import PlayerNode from './PlayerNode.vue'
@@ -8,9 +8,10 @@ import { Ref } from 'vue'
 import * as types from '../types'
 
 const initialElements: Elements = []
+const { setTransform } = useZoomPanHelper()
 
 
-const { instance, onConnect, nodes, edges, addEdges, addNodes,setNodes, setEdges, onEdgesChange, onNodesChange, setTranslateExtent, setState } = useVueFlow()
+const { instance, onConnect, nodes, edges, addEdges, addNodes,setNodes, setEdges, onEdgesChange, onNodesChange, setTranslateExtent, setState, store } = useVueFlow()
 
 let id = 0
 const getId = () => `node${id++}`
@@ -26,7 +27,6 @@ const getNodeID = () :number | null => {
 
 onNodesChange((params) =>
 {
-  console.log(params)
   params.forEach((value: NodeChange) => {
     if(Scenario.value != null && selectedDialogIndex.value != null)
     {
@@ -130,23 +130,22 @@ const jsonFileLoaded = (scenario : types.Scenario) => {
 
 const dialogSelected = (index: number) => {
   selectedDialogIndex.value = index
-  id = Number(Scenario.value?.conversations[index].nodes.length) + 1;
+  //id = Number(Scenario.value?.conversations[index].nodes.length) + 1;
 
-  /*const node = Scenario.value?.conversations[index].nodes[0]
+  let biggestId = 0;
+  Scenario.value?.conversations[index].nodes.forEach((item, index) => {
+    (Number(item.id.substring(4)) > biggestId)
+    biggestId = Number(item.id.substring(4))
+  })
 
-  //document.getElementsByClassName('.vue-flow__transformationpane').style.transform = "translate(100px, 100px)"
-  const coord: CoordinateExtent = [
-    [0, 0],
-    [100, 100],
-  ]
+  id = biggestId + 1;
 
-   const coord2: CoordinateExtent = [
-    [Number.NEGATIVE_INFINITY, Number.NEGATIVE_INFINITY],
-    [Number.POSITIVE_INFINITY, Number.POSITIVE_INFINITY],
-  ]
-  setState({viewport: {x:0, y:0, zoom:1}})
-  setTranslateExtent(coord)
-  setTranslateExtent(coord2)*/
+  const node = Scenario.value?.conversations[index].nodes[0]
+
+  const xpos = Number(node?.position.x)
+  const ypos = Number(node?.position?.y)
+
+   setTransform({ x: xpos + 200 || 0, y:ypos + 200 || 0, zoom: 1 })
 }
 
 const elements = ref(initialElements)
