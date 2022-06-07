@@ -1,13 +1,14 @@
 <script lang="ts" setup>
 import { CSSProperties } from 'vue'
 import { Handle, Position, Connection, Edge, NodeProps, useVueFlow } from '@braks/vue-flow'
+import { ResponseQuest } from '~/types'
 
 interface NPCNodeProps extends NodeProps {
   id: string,
   data: {
-    texts: Array<string>
+    texts: Array<ResponseQuest>
     name: string
-    fullfilsQuest: Boolean
+    questId: number
     onChange: (event: any) => void
     onConnect: (params: Connection | Edge) => void
   }
@@ -18,7 +19,8 @@ const targetHandleStyle: CSSProperties = { background: '#555', position: 'absolu
 const sourceHandleStyleA: CSSProperties = { ...targetHandleStyle, position: 'relative', left: "15px", top: "0px", transform: "0" }
 
 const addText = () => {
-  props.data.texts.push("")
+    let newText: ResponseQuest = new ResponseQuest("", false)
+    props.data.texts.push(newText)
   }
 
 const nameChange = (event: any) => {
@@ -26,7 +28,7 @@ const nameChange = (event: any) => {
 }
 
 const textChange = (event: any, index: number) => {
-  props.data.texts[index] = (event.target as HTMLInputElement).value
+  props.data.texts[index].text = (event.target as HTMLInputElement).value
 }
 
 const removeText = (index: number) => {
@@ -59,7 +61,7 @@ export default {
   </div>
   <ul id="texts-npcs">
       <li v-for="(text, index) in data.texts" :key="index" style="position:relative;">
-            <textarea class="nodrag" :value="data.texts[index]" @input="textChange($event, index)" oninput='this.style.height = "";this.style.height = this.scrollHeight + "px"'/>
+            <textarea class="nodrag" :value="data.texts[index].text" @input="textChange($event, index)" oninput='this.style.height = "";this.style.height = this.scrollHeight + "px"'/>
             <span @click="removeText(index)">x</span>
             <!--<Handle :id="'s' + index" type="source" :position="Position.Right" :style="sourceHandleStyleA" />-->
       </li>

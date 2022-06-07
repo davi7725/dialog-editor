@@ -9,6 +9,7 @@
     "@braks/vue-flow": "latest",
     "@types/d3": "^7.1.0",
     "file-saver": "^2.0.5",
+    "mitt": "^3.0.0",
     "vue": "^3.2.31",
     "vue-textarea-autogrow-directive": "^0.2.0"
   },

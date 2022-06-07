@@ -1,15 +1,33 @@
+export class ResponseQuest {
+  text!: string;
+  solvesQuest!: Boolean;
+
+  constructor(text: string, solvesQuest: Boolean) {
+    this.text = text;
+    this.solvesQuest = solvesQuest;
+  }
+}
+
+export class NodeTrigger {
+  nameOfTrigger!: string;
+  waitTime!: number;
+}
 
 export class NodeData {
     name!: string;
     playerType!: string;
-    texts!: Array<string>;
-    fullfilsQuest!: Boolean;
+    texts!: Array<ResponseQuest>;
+    triggers!: Array<NodeTrigger>
+    useSocialActions!: Boolean;
+    questId!: number;
 
-    constructor(name: string, playerType: string, texts: Array<string>, fullfilsQuest: Boolean) {
+    constructor(name: string, playerType: string, texts: Array<ResponseQuest>, triggers: Array<NodeTrigger>, useSocialActions: Boolean, questId: number) {
       this.name = name;
       this.playerType = playerType;
       this.texts = texts;
-      this.fullfilsQuest = fullfilsQuest;
+      this.useSocialActions = useSocialActions;
+      this.triggers = triggers;
+      this.questId = questId;
     }
   }
   
@@ -60,9 +78,23 @@ export class NodeData {
     edges!: Array<ConversationEdge>;
     actors!: Array<string>;
   }
+
+  export class NodePosition3 {
+    x!: number;
+    y!: number;
+    z!: number;
+  }
+
+  export class QuestData {
+    id!: number;
+    navigationPoint!: NodePosition3;
+    quest!: string;
+    questType!: number;
+    solved!: boolean;
+  }
   
   export class Scenario  {
     briefing!: string;
-    quests!: Array<string>;
+    quests!: Array<QuestData>;
     conversations!: Array<Conversation>;
   }

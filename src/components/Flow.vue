@@ -17,6 +17,7 @@ let id = 0
 const getId = () => `node${id++}`
 let selectedDialogIndex : Ref<number | null> = ref(null)
 
+
 const getNodeID = () :number | null => {
   if(Scenario.value != null && selectedDialogIndex.value != null)
   {
@@ -27,6 +28,10 @@ const getNodeID = () :number | null => {
 
 onNodesChange((params) =>
 {
+  edges.value.forEach((e: any) => {
+    delete e.selected
+  });
+  
   params.forEach((value: NodeChange) => {
     if(Scenario.value != null && selectedDialogIndex.value != null)
     {
@@ -55,6 +60,10 @@ onNodesChange((params) =>
 
 onEdgesChange((params) =>
 {
+  nodes.value.forEach((n: any) => {
+    delete n.selected
+  });
+  
   params.forEach((value: EdgeChange) => {
     if(value.type === 'remove' && Scenario.value != null && selectedDialogIndex.value != null)
     {
@@ -90,7 +99,9 @@ const onChange = (event: Event) => {
 const onDrop = (event: DragEvent) => {
   if (instance.value) {
     const nodeId = getId()
-    const texts: Array<string> = []
+    const texts: Array<types.ResponseQuest> = []
+    const triggers: Array<types.NodeTrigger> = []
+    const questId: number = -1
     const type = event.dataTransfer?.getData('application/vueflow') as string
     const nodeClass = event.dataTransfer?.getData('application/nodeClass') as string
     const npcName = event.dataTransfer?.getData('application/npcName') as string
@@ -99,14 +110,16 @@ const onDrop = (event: DragEvent) => {
       id: nodeId,
       type,
       class: nodeClass,
-      data: {onChange, onConnect, name:npcName, texts:texts, playerType: nodeClass, fullfilsQuest: false},
+      data: {onChange, onConnect, name:npcName, texts:texts, playerType: nodeClass, questId: questId, quests: Scenario.value?.quests,},
       connectable: true,
       position,
       label: `${type} node`,
     } as unknown as Node
     addNodes([newNode])
 
-    let node = new types.ConversationNode(nodeId, new types.NodePosition(event.clientX, event.clientY -40), type, nodeClass, new types.NodeData(npcName, nodeClass,texts, false))
+    console.log("QYESTS")
+    console.log(Scenario.value?.quests)
+    let node = new types.ConversationNode(nodeId, new types.NodePosition(event.clientX, event.clientY -40), type, nodeClass, new types.NodeData(npcName, nodeClass,texts, triggers, false, questId))
     Scenario.value?.conversations[selectedDialogIndex.value as number].nodes.push(node)
   }
 }
@@ -118,11 +131,60 @@ const nodeTypes = {
 
 const Scenario: Ref<types.Scenario | null> = ref(null)
 
-const sideBar = ref(null);
+const sideBar : Sidebar | null = ref(null);
 
 const jsonFileLoaded = (scenario : types.Scenario) => {
   Scenario.value = null
   Scenario.value = scenario
+
+  Scenario.value?.conversations.forEach((convo: types.Conversation) => {
+    convo.nodes.forEach((node: any) => {
+      if(node.type == "playerNode")
+      {
+        node.data.quests = Scenario.value?.quests;
+      }
+    })
+  })
+
+  Scenario.value?.quests.forEach((q: any) => 
+  {
+    q.solved = false;
+  })
+
+  const questSolved = new Map<number, boolean>();
+  Scenario.value?.conversations.forEach((convo: types.Conversation) =>
+  {
+    convo.nodes.forEach(( node: types.ConversationNode) => {
+      let solves = false;
+      node.data.texts.forEach((text: types.ResponseQuest) => 
+      {
+        if(text.solvesQuest)
+        {
+          solves = true;
+          console.log(node)
+        }
+      })
+
+      if(solves)
+        questSolved.set(node.data.questId, true)
+    })
+  })
+  console.log(questSolved)
+  Scenario.value?.quests.forEach((q: types.QuestData) =>
+  {
+    if(questSolved.get(q.id) == true)
+    {
+      q.solved = true;
+    }
+    else
+    {
+       console.log("NOT NOT")
+      q.solved = false;
+    }
+  })
+
+  console.log(Scenario.value?.quests);
+
   
   selectedDialogIndex.value = null
   sideBar.value?.reset();

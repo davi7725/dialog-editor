@@ -1,13 +1,18 @@
 <script lang="ts" setup>
 import { CSSProperties } from 'vue'
 import { Handle, Position, Connection, Edge, NodeProps } from '@braks/vue-flow'
+import { QuestData, ResponseQuest } from '~/types'
+import useEventsBus from './eventBus';
+
+const {emit}=useEventsBus()
 
 interface PlayerNodeProps extends NodeProps {
   id: string,
   data: {
-    texts: Array<string>
+    texts: Array<ResponseQuest>
     playerType: string
-    fullfilsQuest: Boolean
+    questId: number
+    quests: Array<QuestData>
     onChange: (event: any) => void
     onConnect: (params: Connection | Edge) => void
   }
@@ -18,7 +23,8 @@ const targetHandleStyle: CSSProperties = { background: '#555', position: 'absolu
 const sourceHandleStyleA: CSSProperties = { ...targetHandleStyle, position: 'relative', left: "15px", top: "0px", transform: "0" }
 
 const addText = () => {
-    props.data.texts.push("")
+    let newText: ResponseQuest = new ResponseQuest("", false)
+    props.data.texts.push(newText)
 }
 
 const typeChange = (event: any) => {
@@ -26,12 +32,29 @@ const typeChange = (event: any) => {
 }
 
 const textChange = (event: any, index: number) => {
-  props.data.texts[index] = (event.target as HTMLInputElement).value
+  props.data.texts[index].text = (event.target as HTMLInputElement).value
 }
 
 const removeText = (index: number) => {
   props.data.texts.splice(index, 1)
 }
+
+const sendQuestEvent = (index: number) =>
+{
+  let solved = false;
+  props.data.texts.forEach((v, i) => {
+    if(v.solvesQuest)
+      solved = true;
+  })
+
+  let solvedData = {
+    isSolved: solved,
+    questId: props.data.questId
+  }
+  
+  emit("questChange", solvedData)
+}
+
 </script>
 <script lang="ts">
 export default {
@@ -46,31 +69,41 @@ export default {
 </script>
 <template>
   <div style="position:relative;">
-  <Handle type="target" id="gi1" :position="Position.Left" :style="targetHandleStyle" :on-connect="props.data.onConnect" />
-  <Handle type="source" id="go1" :position="Position.Right" :style="targetHandleStyle" :on-connect="props.data.onConnect" />
-  <div>
-    <strong v-if="props.data.playerType == 'player1'">Player 1</strong>
-    <strong v-if="props.data.playerType == 'player2'">Player 2</strong>
-    <strong v-if="props.data.playerType == 'playerAll'">All Players</strong>
-  </div>
-  <hr>
-  <div>
-    Responses:
-  </div>
-    <!--<Handle id="index" type="source" :style="sourceHandleStyleA" />    
-    <Handle id="index2" type="source" :style="sourceHandleStyleA" />  -->    
-  <ul id="texts-npcs">
-      <li v-for="(text, index) in data.texts" :key="index" style="position:relative;">
-            <textarea class="nodrag" :value="data.texts[index]" @input="textChange($event, index)" oninput='this.style.height = "";this.style.height = this.scrollHeight + "px"' />
-            <Handle :id="'p' + index" type="source" :position="Position.Right" :style="sourceHandleStyleA" />    
-            <span @click="removeText(index)">x</span>
-      </li>
+    <Handle type="target" id="gi1" :position="Position.Left" :style="targetHandleStyle" :on-connect="props.data.onConnect" />
+    <Handle type="source" id="go1" :position="Position.Right" :style="targetHandleStyle" :on-connect="props.data.onConnect" />
+    <div>
+      <strong v-if="props.data.playerType == 'player1'">Player 1</strong>
+      <strong v-if="props.data.playerType == 'player2'">Player 2</strong>
+      <strong v-if="props.data.playerType == 'playerAll'">All Players</strong>
+    </div>
+    <hr>
+    <div>
+      Responses:
+    </div>
+      <!--<Handle id="index" type="source" :style="sourceHandleStyleA" />    
+      <Handle id="index2" type="source" :style="sourceHandleStyleA" />  -->    
+    <ul id="texts-npcs">
+        <li v-for="(text, index) in data.texts" :key="index" style="position:relative;">
+          <input v-if="data.questId != -1" type="checkbox" v-model="data.texts[index].solvesQuest" @change="sendQuestEvent(index)"/>  
+          <textarea class="nodrag" :value="data.texts[index].text" @input="textChange($event, index)" oninput='this.style.height = "";this.style.height = this.scrollHeight + "px"' />
+          <Handle :id="'p' + index" type="source" :position="Position.Right" :style="sourceHandleStyleA" />    
+          <span @click="removeText(index)">x</span>
+        </li>
 
 
-  </ul>
-  <br>
-  <button @click="addText">Add response</button>
-  <div class="footer" v-if="props.data.fullfilsQuest">Fullfils Quest</div>
+    </ul>
+    <br>
+    <button @click="addText">Add response</button>
+    <hr>
+    <div>
+      Quest:
+      <select v-model="data.questId" style="max-width: 170px">
+        <option value="-1">None</option>
+        <option v-for="q in data.quests.filter(x => x.questType == 0)" :value="q.id" :key="q.id">
+          <span>{{ q.quest }}</span>
+        </option>
+      </select>
+    </div>
   </div>
 </template>
 

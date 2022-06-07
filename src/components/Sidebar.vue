@@ -2,7 +2,7 @@
 import { useVueFlow } from '@braks/vue-flow'
 import { Ref } from 'vue'
 import * as types from '../types'
-
+import useEventsBus from './eventBus';
 
 const { nodes, edges, addNodes, setNodes, setEdges, instance, dimensions } = useVueFlow()
 
@@ -41,7 +41,7 @@ const setDialog = (dialog: types.Conversation, index: number) => {
   selectedDialogIndex.value = index
 
   emit('dialogSelected', index);
-
+  
   setNodes(dialog.nodes)
   setEdges(dialog.edges)
 }
@@ -57,9 +57,62 @@ const addNPC = () => {
 const addQuest = () => {
   if(props.scenario != null)
   {
-    props.scenario.quests.push("")
+    let quest: types.QuestData = {
+      id: props.scenario?.quests.length,
+      navigationPoint: {
+        x: 0,
+        y: 0,
+        z: 0
+      },
+      quest: "",
+      questType: 0
+    }
+    props.scenario.quests.push(quest)
   }
 }
+
+const { bus } = useEventsBus()
+const questSolved = new Map<number, boolean>();
+
+watch(()=>bus.value.get('questChange'), (val) => {
+  questSolved.clear();
+  props.scenario?.conversations.forEach((convo: types.Conversation) =>
+  {
+    convo.nodes.forEach(( node: types.ConversationNode) => {
+      let solves = false;
+      node.data.texts.forEach((text: types.ResponseQuest) => 
+      {
+        if(text.solvesQuest)
+        {
+          solves = true;
+          console.log(node)
+        }
+      })
+
+      if(solves)
+        questSolved.set(node.data.questId, true)
+    })
+  })
+console.log(questSolved);
+console.log(props.scenario?.quests)
+  props.scenario?.quests.forEach((q: types.QuestData) =>
+  {
+    if(questSolved.get(q.id) == true)
+      q.solved = true;
+    else
+      q.solved = false;
+  })
+})
+
+const someMethod = (index: number) =>
+{
+  console.log("evaluating")
+  if(questSolved.get(index) == true)
+    return 'solved'
+  else
+    return ''
+}
+
 </script>
 <template>
 <div class="hidemenu">
@@ -75,7 +128,7 @@ const addQuest = () => {
         <div class="description">Here you can see and edit the quests for the scenario</div>
         <hr>
         <div v-for="(text, index) in scenario.quests" :key="index">
-          <textarea name="quest" v-model="scenario.quests[index]" rows="" />
+          <textarea v-if="scenario.quests[index].questType == 0" name="quest" v-model="scenario.quests[index].quest" rows="" :class="{'solved': scenario.quests[index].solved == true}"/>
         </div>
         <button @click="addQuest">Add Quest</button>
       </aside>
@@ -92,18 +145,18 @@ const addQuest = () => {
       <div class="description">You can drag these nodes to the pane.</div>
       <hr>
       <div class="description">Player Nodes</div>
-      <div class="vue-flow__node-default player1" :draggable="true" @dragstart="(event: DragEvent) => onDragStart(event, 'playerNode', 'player1')">
+      <div class="vue-flow__node-default player1" :draggable="true" @dragstart="(event) => onDragStart(event, 'playerNode', 'player1')">
         Player1 Node
       </div>
-      <div class="vue-flow__node-default player2" :draggable="true" @dragstart="(event: DragEvent) => onDragStart(event, 'playerNode', 'player2')">
+      <div class="vue-flow__node-default player2" :draggable="true" @dragstart="(event) => onDragStart(event, 'playerNode', 'player2')">
         Player2 Node
       </div>
-      <div class="vue-flow__node-default playerAll" :draggable="true" @dragstart="(event: DragEvent) => onDragStart(event, 'playerNode', 'playerAll')">
+      <div class="vue-flow__node-default playerAll" :draggable="true" @dragstart="(event) => onDragStart(event, 'playerNode', 'playerAll')">
         All Players Node
       </div>
         <hr>
         <div class="description">NPC Nodes</div>
-        <div v-for="(text, index) in scenario.conversations[selectedDialogIndex].actors" :key="index" class="vue-flow__node-default npc" :draggable="true" @dragstart="(event: DragEvent) => onDragStart(event, 'npcNode', 'npc', text)">
+        <div v-for="(text, index) in scenario.conversations[selectedDialogIndex].actors" :key="index" class="vue-flow__node-default npc" :draggable="true" @dragstart="(event) => onDragStart(event, 'npcNode', 'npc', text)">
           {{text}}
         </div>
         <button @click="addNPC">Add NPC</button>
@@ -125,6 +178,7 @@ const addQuest = () => {
 
 ::-webkit-scrollbar-track
 {
+  box-shadow: inset 0 0 6px rgba(0,0,0,0.3);
 	-webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.3);
 	border-radius: 10px;
 	background-color: #F5F5F5;
@@ -139,7 +193,12 @@ const addQuest = () => {
 ::-webkit-scrollbar-thumb
 {
 	border-radius: 10px;
+	box-shadow: inset 0 0 6px rgba(0,0,0,.3);
 	-webkit-box-shadow: inset 0 0 6px rgba(0,0,0,.3);
 	background-color: #555;
+}
+
+.solved {
+  border: 3px solid green; 
 }
 </style>
