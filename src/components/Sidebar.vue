@@ -146,7 +146,7 @@ watch(()=>bus.value.get('questChange'), (val) => {
             <div class="list-item">
               <font-awesome-icon icon="grip" class="handle" />
               <textarea v-bind:disabled="element.questType != 0" name="quest" v-model="element.quest" rows="" :class="{'solved': element.solved == true}" oninput='this.style.height = "";this.style.height = this.scrollHeight + "px"'/>
-              <font-awesome-icon icon="trash" style="cursor:pointer;" @click="removeQuest(element.id)"/>
+              <font-awesome-icon v-if="element.questType == 0" icon="trash" style="cursor:pointer;" @click="removeQuest(element.id)"/>
             </div>
           </template>
         </draggable>
