@@ -117,8 +117,6 @@ const onDrop = (event: DragEvent) => {
     } as unknown as Node
     addNodes([newNode])
 
-    console.log("QYESTS")
-    console.log(Scenario.value?.quests)
     let node = new types.ConversationNode(nodeId, new types.NodePosition(event.clientX, event.clientY -40), type, nodeClass, new types.NodeData(npcName, nodeClass,texts, triggers, false, questId))
     Scenario.value?.conversations[selectedDialogIndex.value as number].nodes.push(node)
   }
@@ -161,7 +159,6 @@ const jsonFileLoaded = (scenario : types.Scenario) => {
         if(text.solvesQuest)
         {
           solves = true;
-          console.log(node)
         }
       })
 
@@ -169,7 +166,6 @@ const jsonFileLoaded = (scenario : types.Scenario) => {
         questSolved.set(node.data.questId, true)
     })
   })
-  console.log(questSolved)
   Scenario.value?.quests.forEach((q: types.QuestData) =>
   {
     if(questSolved.get(q.id) == true)
@@ -178,12 +174,9 @@ const jsonFileLoaded = (scenario : types.Scenario) => {
     }
     else
     {
-       console.log("NOT NOT")
       q.solved = false;
     }
   })
-
-  console.log(Scenario.value?.quests);
 
   
   selectedDialogIndex.value = null

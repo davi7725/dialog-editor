@@ -97,6 +97,10 @@ aside {
   margin-bottom: 10px;
 }
 
+.small {
+  font-size: x-small;
+}
+
  .vue-flow-wrapper {
   flex-grow: 1;
   height: 100%;

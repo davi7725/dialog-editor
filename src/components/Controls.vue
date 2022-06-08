@@ -27,18 +27,30 @@ export default {
     if(this.$props.scenario != null)
     {
       let exportScenario = JSON.parse(JSON.stringify(this.$props.scenario));
-
+      exportScenario.quests.forEach((el: any, index:number) => {
+              el.order = index;
+            });
       exportScenario.conversations.forEach((convo: any) => {
         convo.nodes.forEach((node: any) => {
           if(node.type == "playerNode")
           {
+            if(node.data.questId > -1)
+            {
+              let q = exportScenario.quests.find((e: types.QuestData) => e.id == node.data.questId);
+              if(q != undefined)
+                node.data.questId = q.order;
+              else
+                node.data.questId = -1;
+            }
             delete node.data.quests;
           }
         })
       })
 
       exportScenario.quests.forEach((el: any) => {
+        el.id = el.order;
         delete el.solved;
+        delete el.order;
       });
 
       var blob = new Blob([JSON.stringify(exportScenario)], { type: "application/json" })

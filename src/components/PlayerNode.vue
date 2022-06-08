@@ -39,7 +39,7 @@ const removeText = (index: number) => {
   props.data.texts.splice(index, 1)
 }
 
-const sendQuestEvent = (index: number) =>
+const sendQuestEvent = () =>
 {
   let solved = false;
   props.data.texts.forEach((v, i) => {
@@ -84,7 +84,7 @@ export default {
       <Handle id="index2" type="source" :style="sourceHandleStyleA" />  -->    
     <ul id="texts-npcs">
         <li v-for="(text, index) in data.texts" :key="index" style="position:relative;">
-          <input v-if="data.questId != -1" type="checkbox" v-model="data.texts[index].solvesQuest" @change="sendQuestEvent(index)"/>  
+          <input v-if="data.questId != -1" type="checkbox" v-model="data.texts[index].solvesQuest" @change="sendQuestEvent()"/>  
           <textarea class="nodrag" :value="data.texts[index].text" @input="textChange($event, index)" oninput='this.style.height = "";this.style.height = this.scrollHeight + "px"' />
           <Handle :id="'p' + index" type="source" :position="Position.Right" :style="sourceHandleStyleA" />    
           <span @click="removeText(index)">x</span>
@@ -97,7 +97,7 @@ export default {
     <hr>
     <div>
       Quest:
-      <select v-model="data.questId" style="max-width: 170px">
+      <select v-model="data.questId" style="max-width: 170px" @change="sendQuestEvent()">
         <option value="-1">None</option>
         <option v-for="q in data.quests.filter(x => x.questType == 0)" :value="q.id" :key="q.id">
           <span>{{ q.quest }}</span>

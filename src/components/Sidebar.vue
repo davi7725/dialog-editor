@@ -3,6 +3,7 @@ import { useVueFlow } from '@braks/vue-flow'
 import { Ref } from 'vue'
 import * as types from '../types'
 import useEventsBus from './eventBus';
+import draggable from 'vuedraggable'
 
 const { nodes, edges, addNodes, setNodes, setEdges, instance, dimensions } = useVueFlow()
 
@@ -18,6 +19,7 @@ const onDragStart = (event: DragEvent, nodeType: string, nodeClass: string, npcN
 let selectedDialog : types.Conversation | null = null
 let selectedDialogIndex : Ref<number | null>  = ref(null)
 let currentActors : Ref<Array<string> | null> = ref(null)
+let questId : number = 1000;
 
 const props = defineProps({
   scenario: types.Scenario
@@ -57,17 +59,28 @@ const addNPC = () => {
 const addQuest = () => {
   if(props.scenario != null)
   {
+    questId = questId * 2;
     let quest: types.QuestData = {
-      id: props.scenario?.quests.length,
+      id: questId,
       navigationPoint: {
         x: 0,
         y: 0,
         z: 0
       },
       quest: "",
-      questType: 0
+      questType: 0,
+      solved: false
     }
     props.scenario.quests.push(quest)
+  }
+}
+
+const removeQuest = (id: number) => {
+  if(props.scenario != null)
+  {
+    let q = props.scenario.quests.find((el: types.QuestData) => el.id == id)
+    let i = props.scenario.quests.indexOf(q)
+    props.scenario.quests.splice(i,1)
   }
 }
 
@@ -93,8 +106,6 @@ watch(()=>bus.value.get('questChange'), (val) => {
         questSolved.set(node.data.questId, true)
     })
   })
-console.log(questSolved);
-console.log(props.scenario?.quests)
   props.scenario?.quests.forEach((q: types.QuestData) =>
   {
     if(questSolved.get(q.id) == true)
@@ -104,15 +115,17 @@ console.log(props.scenario?.quests)
   })
 })
 
-const someMethod = (index: number) =>
-{
-  console.log("evaluating")
-  if(questSolved.get(index) == true)
-    return 'solved'
-  else
-    return ''
-}
-
+</script>
+<script lang="ts">
+  export default {
+    inheritAttrs: false,
+    mounted() {
+      document.querySelectorAll('textarea').forEach(textarea => {
+          textarea.style.height = '';
+          textarea.style.height = textarea.scrollHeight + 'px';
+        });
+    }
+  }
 </script>
 <template>
 <div class="hidemenu">
@@ -126,9 +139,21 @@ const someMethod = (index: number) =>
       </aside>
       <aside v-if="scenario != null"> 
         <div class="description">Here you can see and edit the quests for the scenario</div>
+        <div class="description small">Order them in cronological order (top to bottom) using the left handle to drag the quests.</div>
         <hr>
+        <draggable class="list-container" :list="scenario.quests" item-key="id" handle=".handle">
+          <template #item="{element}">
+            <div class="list-item">
+              <font-awesome-icon icon="grip" class="handle" />
+              <textarea v-bind:disabled="element.questType != 0" name="quest" v-model="element.quest" rows="" :class="{'solved': element.solved == true}" oninput='this.style.height = "";this.style.height = this.scrollHeight + "px"'/>
+              <font-awesome-icon icon="trash" style="cursor:pointer;" @click="removeQuest(element.id)"/>
+            </div>
+          </template>
+        </draggable>
         <div v-for="(text, index) in scenario.quests" :key="index">
-          <textarea v-if="scenario.quests[index].questType == 0" name="quest" v-model="scenario.quests[index].quest" rows="" :class="{'solved': scenario.quests[index].solved == true}"/>
+          
+            
+          
         </div>
         <button @click="addQuest">Add Quest</button>
       </aside>
@@ -201,4 +226,18 @@ const someMethod = (index: number) =>
 .solved {
   border: 3px solid green; 
 }
+
+.list-container
+{
+  display: flex;
+  flex-direction: column;
+  gap:10px;
+}
+
+.list-item {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
 </style>
