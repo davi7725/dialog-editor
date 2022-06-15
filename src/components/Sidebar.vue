@@ -22,7 +22,8 @@ let currentActors : Ref<Array<string> | null> = ref(null)
 let questId : number = 1000;
 
 const props = defineProps({
-  scenario: types.Scenario
+  scenario: types.Scenario,
+  filename: String
 })
 
 const emit = defineEmits(['dialogSelected'])
@@ -38,7 +39,6 @@ const reset = () => {
 defineExpose({ reset });
 
 const setDialog = (dialog: types.Conversation, index: number) => {
-  console.log(selectedDialogIndex)
   selectedDialog = dialog
   selectedDialogIndex.value = index
 
@@ -98,7 +98,6 @@ watch(()=>bus.value.get('questChange'), (val) => {
         if(text.solvesQuest)
         {
           solves = true;
-          console.log(node)
         }
       })
 
@@ -130,6 +129,13 @@ watch(()=>bus.value.get('questChange'), (val) => {
 <template>
 <div class="hidemenu">
   <container>
+      <aside v-if="scenario != null"> 
+          <div class="description">Current file being edited:</div>
+          <hr>
+          <div>
+            {{filename}}
+          </div>
+      </aside>
       <aside v-if="scenario != null"> 
           <div class="description">Here you can select the dialogs from this scenario</div>
           <hr>
@@ -238,6 +244,10 @@ watch(()=>bus.value.get('questChange'), (val) => {
   display: flex;
   align-items: center;
   gap: 5px;
+}
+
+.handle {
+  cursor: move;
 }
 
 </style>

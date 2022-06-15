@@ -98,14 +98,18 @@ const onChange = (event: Event) => {
 
 const onDrop = (event: DragEvent) => {
   if (instance.value) {
+    const type = event.dataTransfer?.getData('application/vueflow') as string
+    if(type == "")
+      return
+    
     const nodeId = getId()
     const texts: Array<types.ResponseQuest> = []
     const triggers: Array<types.NodeTrigger> = []
     const questId: number = -1
-    const type = event.dataTransfer?.getData('application/vueflow') as string
     const nodeClass = event.dataTransfer?.getData('application/nodeClass') as string
     const npcName = event.dataTransfer?.getData('application/npcName') as string
     const position = instance.value.project({ x: event.clientX, y: event.clientY - 40 })
+
     const newNode = {
       id: nodeId,
       type,
@@ -128,12 +132,15 @@ const nodeTypes = {
 }
 
 const Scenario: Ref<types.Scenario | null> = ref(null)
+const Filename: Ref<string | null> = ref(null)
 
 const sideBar : Sidebar | null = ref(null);
 
-const jsonFileLoaded = (scenario : types.Scenario) => {
+const jsonFileLoaded = (data : any) => {
   Scenario.value = null
-  Scenario.value = scenario
+  Scenario.value = data.scenario
+  Filename.value = null
+  Filename.value = data.filename
 
   Scenario.value?.conversations.forEach((convo: types.Conversation) => {
     convo.nodes.forEach((node: any) => {
@@ -210,7 +217,7 @@ const elements = ref(initialElements)
     <VueFlow v-model="elements" @dragover="onDragOver" :node-types="nodeTypes">
       <Background :variant="BackgroundVariant.Lines" pattern-color="#4d4d4d" gap="25" />
       <Controls :scenario=Scenario v-on:json-file-loaded="jsonFileLoaded" />
-      <Sidebar :scenario=Scenario v-on:dialog-selected="dialogSelected" ref="sideBar"/>
+      <Sidebar :scenario=Scenario :filename=Filename v-on:dialog-selected="dialogSelected" ref="sideBar"/>
     </VueFlow>
   </div>
 </template>

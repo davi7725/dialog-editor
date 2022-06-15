@@ -64,8 +64,7 @@ export default {
         if(e.target != null)
         {
           let scenario = JSON.parse(String(e.target.result)) as types.Scenario;
-          console.log(scenario)
-          this.$emit('json-file-loaded', scenario);
+          this.$emit('json-file-loaded', {scenario: scenario, filename: file.name});
         }
       };
       reader.readAsText(file)

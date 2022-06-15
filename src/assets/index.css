@@ -90,8 +90,11 @@ aside {
 
  aside > * {
   margin-bottom: 10px !important;
-  cursor: grab;
 } 
+
+.vue-flow__node-default {
+  cursor: grab;
+}
 
  aside .description {
   margin-bottom: 10px;
