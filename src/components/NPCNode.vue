@@ -8,7 +8,6 @@ interface NPCNodeProps extends NodeProps {
   data: {
     texts: Array<ResponseQuest>
     name: string
-    questId: number
     onChange: (event: any) => void
     onConnect: (params: Connection | Edge) => void
   }

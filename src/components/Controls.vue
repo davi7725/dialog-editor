@@ -1,5 +1,4 @@
 <script lang="ts" setup>
-import { useZoomPanHelper, FlowExportObject, Node, useVueFlow } from '@braks/vue-flow'
 
 import * as types from '../types'
 import { saveAs } from 'file-saver';
@@ -34,15 +33,19 @@ export default {
         convo.nodes.forEach((node: any) => {
           if(node.type == "playerNode")
           {
-            if(node.data.questId > -1)
+            if(node.data.questId.id > -1)
             {
-              let q = exportScenario.quests.find((e: types.QuestData) => e.id == node.data.questId);
+              let q = exportScenario.quests.find((e: types.QuestData) => e.id == node.data.questId.id);
               if(q != undefined)
-                node.data.questId = q.order;
+                node.data.questId.id = q.order;
               else
-                node.data.questId = -1;
+                node.data.questId.id = -1;
             }
             delete node.data.quests;
+
+            let temp = node.data.questId.id;
+            delete node.data.questId;
+            node.data.questId = temp;
           }
         })
       })
@@ -64,6 +67,14 @@ export default {
         if(e.target != null)
         {
           let scenario = JSON.parse(String(e.target.result)) as types.Scenario;
+
+          scenario.conversations.forEach((item) => {
+            item.nodes.forEach((n) => {
+              let temp: number = n.data.questId;
+              n.data.questId = new types.QuestId(temp);
+            })
+          })
+
           this.$emit('json-file-loaded', {scenario: scenario, filename: file.name});
         }
       };

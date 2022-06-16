@@ -102,7 +102,7 @@ watch(()=>bus.value.get('questChange'), (val) => {
       })
 
       if(solves)
-        questSolved.set(node.data.questId, true)
+        questSolved.set(node.data.questId.id, true)
     })
   })
   props.scenario?.quests.forEach((q: types.QuestData) =>

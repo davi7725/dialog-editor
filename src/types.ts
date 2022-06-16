@@ -13,15 +13,23 @@ export class NodeTrigger {
   waitTime!: number;
 }
 
+export class QuestId {
+  id!: number;
+  constructor(id: number) {
+    this.id = id;
+  }
+}
+
 export class NodeData {
     name!: string;
     playerType!: string;
     texts!: Array<ResponseQuest>;
     triggers!: Array<NodeTrigger>
     useSocialActions!: Boolean;
-    questId!: number;
+    questId!: number | QuestId;
+    quests: QuestData[]|undefined;
 
-    constructor(name: string, playerType: string, texts: Array<ResponseQuest>, triggers: Array<NodeTrigger>, useSocialActions: Boolean, questId: number) {
+    constructor(name: string, playerType: string, texts: Array<ResponseQuest>, triggers: Array<NodeTrigger>, useSocialActions: Boolean, questId: QuestId) {
       this.name = name;
       this.playerType = playerType;
       this.texts = texts;

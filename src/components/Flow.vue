@@ -105,7 +105,7 @@ const onDrop = (event: DragEvent) => {
     const nodeId = getId()
     const texts: Array<types.ResponseQuest> = []
     const triggers: Array<types.NodeTrigger> = []
-    const questId: number = -1
+    const questId: types.QuestId = new types.QuestId(-1)
     const nodeClass = event.dataTransfer?.getData('application/nodeClass') as string
     const npcName = event.dataTransfer?.getData('application/npcName') as string
     const position = instance.value.project({ x: event.clientX, y: event.clientY - 40 })
@@ -114,7 +114,7 @@ const onDrop = (event: DragEvent) => {
       id: nodeId,
       type,
       class: nodeClass,
-      data: {onChange, onConnect, name:npcName, texts:texts, playerType: nodeClass, questId: questId, quests: Scenario.value?.quests,},
+      data: {onChange, onConnect, name:npcName, texts:texts, playerType: nodeClass, questId: questId, quests: Scenario.value?.quests},
       connectable: true,
       position,
       label: `${type} node`,
@@ -122,6 +122,7 @@ const onDrop = (event: DragEvent) => {
     addNodes([newNode])
 
     let node = new types.ConversationNode(nodeId, new types.NodePosition(event.clientX, event.clientY -40), type, nodeClass, new types.NodeData(npcName, nodeClass,texts, triggers, false, questId))
+    node.data.quests = Scenario.value?.quests;
     Scenario.value?.conversations[selectedDialogIndex.value as number].nodes.push(node)
   }
 }
@@ -170,7 +171,7 @@ const jsonFileLoaded = (data : any) => {
       })
 
       if(solves)
-        questSolved.set(node.data.questId, true)
+        questSolved.set(node.data.questId.id, true)
     })
   })
   Scenario.value?.quests.forEach((q: types.QuestData) =>
