@@ -47,6 +47,10 @@ export default {
             delete node.data.questId;
             node.data.questId = temp;
           }
+          else if(node.type == "npcNode")
+          {
+            delete node.data.questId;
+          }
         })
       })
 
