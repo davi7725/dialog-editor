@@ -1,11 +1,11 @@
 <script lang="ts" setup>
-import { useVueFlow } from '@braks/vue-flow'
+import { useVueFlow } from '@vue-flow/core'
 import { Ref } from 'vue'
 import * as types from '../types'
 import useEventsBus from './eventBus';
 import draggable from 'vuedraggable'
 
-const { nodes, edges, addNodes, setNodes, setEdges, instance, dimensions } = useVueFlow()
+const { nodes, edges, addNodes, setNodes, setEdges, dimensions } = useVueFlow()
 
 const onDragStart = (event: DragEvent, nodeType: string, nodeClass: string, npcName: string) => {
   if (event.dataTransfer) {
@@ -38,14 +38,28 @@ const reset = () => {
 
 defineExpose({ reset });
 
-const setDialog = (dialog: types.Conversation, index: number) => {
+const setDialog = (dialog: types.Conversation) => {
   selectedDialog = dialog
-  selectedDialogIndex.value = index
+  selectedDialogIndex.value = dialog.id
 
-  emit('dialogSelected', index);
+  emit('dialogSelected', dialog.id);
   
   setNodes(dialog.nodes)
   setEdges(dialog.edges)
+}
+
+const addDialog = () => {
+  if(props.scenario != null)
+  {
+    let dialog: types.Conversation = {
+      id: props.scenario.conversations.length,
+      name: "Dialog " + props.scenario.conversations.length,
+      nodes: new Array<types.ConversationNode>(),
+      edges: new Array<types.ConversationEdge>(),
+      actors: new Array<string>(),
+    }
+    props.scenario.conversations.push(dialog)
+  }
 }
 
 const addNPC = () => {
@@ -81,6 +95,26 @@ const removeQuest = (id: number) => {
     let q = props.scenario.quests.find((el: types.QuestData) => el.id == id)
     let i = props.scenario.quests.indexOf(q)
     props.scenario.quests.splice(i,1)
+  }
+}
+
+const removeDialog = (id: number) => {
+  if(props.scenario != null)
+  {
+    let d = props.scenario.conversations.find((el: types.Conversation) => el.id == id)
+    let i = props.scenario.conversations.indexOf(d)
+    props.scenario.conversations.splice(i,1)
+
+    props.scenario.conversations.forEach((value, index) => {
+      if(value.name == "Dialog " + value.id)
+      {
+        value.name = "Dialog " + index
+      }
+      value.id = index
+    })
+
+    if(id == selectedDialogIndex.value)
+      setDialog(props.scenario.conversations[0]);
   }
 }
 
@@ -139,9 +173,22 @@ watch(()=>bus.value.get('questChange'), (val) => {
       <aside v-if="scenario != null"> 
           <div class="description">Here you can select the dialogs from this scenario</div>
           <hr>
-          <div v-for="(dialog, index) in scenario.conversations" :key="index" class="vue-flow__node-default" :class="{ 'active' : index === selectedDialogIndex }" @click="setDialog(dialog, index)">
-            Dialog {{index}}
-          </div>
+          <draggable class="list-container" :list="scenario.conversations " item-key="id" handle=".handle">
+          <template #item="{element}">
+            <div class="list-item">
+              <font-awesome-icon icon="grip" class="handle" />
+              <div class="vue-flow__node-default dialog-wrapper" :class="{ 'active' : element.id === selectedDialogIndex }" @click="setDialog(element)">
+                <textarea class="dialog-name" name="dialog" v-model="element.name" rows="1"/>
+              </div>
+              <font-awesome-icon icon="trash" style="cursor:pointer;" @click="removeDialog(element.id)"/>
+            </div>
+          </template>
+        </draggable>
+
+          <!--<div v-for="(dialog, index) in scenario.conversations" :key="index" class="vue-flow__node-default" :class="{ 'active' : index === selectedDialogIndex }" @click="setDialog(dialog, index)">
+            <textarea class="dialog-name" name="dialog" v-model="scenario.conversations[index].name" rows="1"/>
+          </div>-->
+          <button @click="addDialog">Add Dialog</button>
       </aside>
       <aside v-if="scenario != null"> 
         <div class="description">Here you can see and edit the quests for the scenario</div>
@@ -151,22 +198,18 @@ watch(()=>bus.value.get('questChange'), (val) => {
           <template #item="{element}">
             <div class="list-item">
               <font-awesome-icon icon="grip" class="handle" />
-              <textarea v-bind:disabled="element.questType != 0" name="quest" v-model="element.quest" rows="" :class="{'solved': element.solved == true}" oninput='this.style.height = "";this.style.height = this.scrollHeight + "px"'/>
+              <textarea class="quest-name" v-bind:disabled="element.questType != 0" name="quest" v-model="element.quest" rows="" :class="{'solved': element.solved == true}" oninput='this.style.height = "";this.style.height = this.scrollHeight + "px"'/>
               <font-awesome-icon v-if="element.questType == 0" icon="trash" style="cursor:pointer;" @click="removeQuest(element.id)"/>
             </div>
           </template>
         </draggable>
-        <div v-for="(text, index) in scenario.quests" :key="index">
-          
-            
-          
-        </div>
+        
         <button @click="addQuest">Add Quest</button>
       </aside>
       <aside v-if="scenario != null"> 
         <div class="description">Here you can see and edit the briefing for the scenario</div>
         <hr>
-        <textarea name="briefing" id="briefing" v-model="scenario.briefing" rows="10" />
+        <textarea class="briefing-name" name="briefing" id="briefing" v-model="scenario.briefing" rows="10" />
       </aside>
   </container>
   </div>

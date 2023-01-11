@@ -1,8 +1,8 @@
 /* import the required styles */
-@import '@braks/vue-flow/dist/style.css';
+@import '@vue-flow/core/dist/style.css';
 
 /* import the default theme (optional) */
-@import '@braks/vue-flow/dist/theme-default.css';
+@import '@vue-flow/core/dist/theme-default.css';
 
 body {
   color: #111;
@@ -48,6 +48,7 @@ body,
 }
 
 .hidemenu {
+  min-height: 100%;
   z-index: 10;
   display:flex;
   flex-direction: column;
@@ -63,6 +64,49 @@ body,
   
   max-height: 100vh;
   overflow-y: auto;
+}
+
+.dialog-wrapper {
+  
+  max-width: calc(100% - 50px);
+  min-width: calc(100% - 50px);
+}
+
+.dialog-name {
+  border: none;
+  outline: none;
+  max-width: 100%;
+  min-width: 100%;
+  resize: vertical;
+  overflow: auto;
+  text-align: center;
+  background: transparent;
+  cursor:text;
+  font-size: 12px;
+  text-transform: uppercase;
+  color: var(--vf-node-text);
+  font-weight: 600;
+}
+
+.active > * {
+  color: #fff;
+}
+
+.quest-name {
+  max-width: calc(100% - 45px);
+  min-width: calc(100% - 45px);
+  margin: 0px;
+  margin-right: 5px;
+  width: 174px;
+  height: 48px;
+}
+
+
+.briefing-name {
+  max-width: calc(100% - 10px);
+  min-width: calc(100% - 10px);
+  margin: 5px;
+  margin-left: 0px;
 }
 
 .sidemenu {

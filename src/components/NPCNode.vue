@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import { CSSProperties } from 'vue'
-import { Handle, Position, Connection, Edge, NodeProps, useVueFlow } from '@braks/vue-flow'
+import { Handle, Position, Connection, Edge, NodeProps, useVueFlow } from '@vue-flow/core'
 import { ResponseQuest } from '~/types'
 
 interface NPCNodeProps extends NodeProps {

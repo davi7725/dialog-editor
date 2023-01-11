@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import { CSSProperties } from 'vue'
-import { Handle, Position, Connection, Edge, NodeProps } from '@braks/vue-flow'
+import { Handle, Position, Connection, Edge, NodeProps } from '@vue-flow/core'
 import { QuestData, QuestId, ResponseQuest } from '~/types'
 import useEventsBus from './eventBus';
 

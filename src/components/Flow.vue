@@ -1,6 +1,7 @@
 <script lang="ts" setup>
 import Controls from './Controls.vue'
-import { VueFlow, Elements, useVueFlow, BackgroundVariant, Background, MiniMap, EdgeChange, NodeChange, CoordinateExtent,useZoomPanHelper } from '@braks/vue-flow'
+import { VueFlow, Elements, useVueFlow, EdgeChange, NodeChange } from '@vue-flow/core'
+import { Background, BackgroundVariant } from '@vue-flow/background'
 import Sidebar from './Sidebar.vue'
 import NPCNode from './NPCNode.vue'
 import PlayerNode from './PlayerNode.vue'
@@ -8,10 +9,9 @@ import { Ref } from 'vue'
 import * as types from '../types'
 
 const initialElements: Elements = []
-const { setTransform } = useZoomPanHelper()
 
 
-const { instance, onConnect, nodes, edges, addEdges, addNodes,setNodes, setEdges, onEdgesChange, onNodesChange, setTranslateExtent, setState, store } = useVueFlow()
+const { project, onConnect, nodes, edges, addEdges, addNodes,setNodes, setEdges, onEdgesChange, onNodesChange, setTranslateExtent, setState, store, setTransform } = useVueFlow()
 
 let id = 0
 const getId = () => `node${id++}`
@@ -97,7 +97,6 @@ const onChange = (event: Event) => {
 }
 
 const onDrop = (event: DragEvent) => {
-  if (instance.value) {
     const type = event.dataTransfer?.getData('application/vueflow') as string
     if(type == "")
       return
@@ -108,7 +107,7 @@ const onDrop = (event: DragEvent) => {
     const questId: types.QuestId = new types.QuestId(-1)
     const nodeClass = event.dataTransfer?.getData('application/nodeClass') as string
     const npcName = event.dataTransfer?.getData('application/npcName') as string
-    const position = instance.value.project({ x: event.clientX, y: event.clientY - 40 })
+    const position = project({ x: event.clientX, y: event.clientY - 40 })
 
     const newNode = {
       id: nodeId,
@@ -124,7 +123,6 @@ const onDrop = (event: DragEvent) => {
     let node = new types.ConversationNode(nodeId, new types.NodePosition(event.clientX, event.clientY -40), type, nodeClass, new types.NodeData(npcName, nodeClass,texts, triggers, false, questId))
     node.data.quests = Scenario.value?.quests;
     Scenario.value?.conversations[selectedDialogIndex.value as number].nodes.push(node)
-  }
 }
 
 const nodeTypes = {
@@ -143,6 +141,11 @@ const jsonFileLoaded = (data : any) => {
   Filename.value = null
   Filename.value = data.filename
 
+  if(Scenario.value?.conversations == undefined)
+  {
+    Scenario.value!.conversations = new Array<types.Conversation>();
+  }
+
   Scenario.value?.conversations.forEach((convo: types.Conversation) => {
     convo.nodes.forEach((node: any) => {
       if(node.type == "playerNode")
@@ -151,6 +154,11 @@ const jsonFileLoaded = (data : any) => {
       }
     })
   })
+
+  if(Scenario.value?.quests == undefined)
+  {
+    Scenario.value!.quests = new Array<types.QuestData>();
+  }
 
   Scenario.value?.quests.forEach((q: any) => 
   {
@@ -208,7 +216,7 @@ const dialogSelected = (index: number) => {
   const xpos = Number(node?.position.x)
   const ypos = Number(node?.position?.y)
 
-   setTransform({ x: xpos + 200 || 0, y:ypos + 200 || 0, zoom: 1 })
+   setTransform({ x: xpos || 0, y:ypos || 0, zoom: 1 })
 }
 
 const elements = ref(initialElements)
@@ -217,8 +225,9 @@ const elements = ref(initialElements)
   <div class="dndflow" @drop="onDrop">
     <VueFlow v-model="elements" @dragover="onDragOver" :node-types="nodeTypes">
       <Background :variant="BackgroundVariant.Lines" pattern-color="#4d4d4d" gap="25" />
-      <Controls :scenario=Scenario v-on:json-file-loaded="jsonFileLoaded" />
-      <Sidebar :scenario=Scenario :filename=Filename v-on:dialog-selected="dialogSelected" ref="sideBar"/>
     </VueFlow>
+    
+    <Controls :scenario=Scenario v-on:json-file-loaded="jsonFileLoaded" />
+    <Sidebar :scenario=Scenario :filename=Filename v-on:dialog-selected="dialogSelected" ref="sideBar"/>
   </div>
 </template>

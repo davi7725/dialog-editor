@@ -12,7 +12,12 @@ interface HTMLInputEvent extends Event {
 export default {
   inheritAttrs: false,
   methods: {
-
+  
+  onCreate() 
+  {
+    let scen = new types.Scenario();
+    this.$emit('json-file-loaded', {scenario: scen, filename: "New Scenario.json"});
+  },
   onFileChange(event: HTMLInputEvent | DragEvent) {
     let files =
       (event as HTMLInputEvent).target.files
@@ -92,6 +97,7 @@ props: {
 </script>
 <template>
   <div class="save__controls">
+    <label class="btn" @click="onCreate">Create scenario</label>
     <label class="btn" @click="onSave">Save scenario</label>
     <label class="btn">
         <input id="hiddenInput" type="file" @change="onFileChange"/>

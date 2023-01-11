@@ -82,6 +82,8 @@ export class NodeData {
   }
   
   export class Conversation {
+    id!: number;
+    name!: string;
     nodes!: Array<ConversationNode>;
     edges!: Array<ConversationEdge>;
     actors!: Array<string>;
