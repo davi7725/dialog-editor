@@ -24,52 +24,109 @@ export default {
     if (files == null || !files.length) return
     this.doSomethingWithTheFile(files[0])
   },
+
+  onAutoSave() {
+    if(this.$props.scenario != null)
+      {
+        let exportScenario = JSON.parse(JSON.stringify(this.$props.scenario));
+        exportScenario.quests.forEach((el: any, index:number) => {
+                el.order = index;
+              });
+        exportScenario.conversations.forEach((convo: any) => {
+          convo.nodes.forEach((node: any) => {
+            if(node.type == "playerNode")
+            {
+              if(node.data.questId.id > -1)
+              {
+                let q = exportScenario.quests.find((e: types.QuestData) => e.id == node.data.questId.id);
+                if(q != undefined)
+                  node.data.questId.id = q.order;
+                else
+                  node.data.questId.id = -1;
+              }
+              delete node.data.quests;
+
+              let temp = node.data.questId.id;
+              delete node.data.questId;
+              node.data.questId = temp;
+            }
+            else if(node.type == "npcNode")
+            {
+              delete node.data.questId;
+            }
+          })
+        })
+
+        exportScenario.quests.forEach((el: any) => {
+          el.id = el.order;
+          delete el.solved;
+          delete el.order;
+        });
+        
+        localStorage.setItem("dialog-editor-storage", JSON.stringify(exportScenario))
+      }
+  },
   
   onSave() {
     let filename = prompt("Define your file name.")
 
-    if(this.$props.scenario != null)
+    if(filename != undefined)
     {
-      let exportScenario = JSON.parse(JSON.stringify(this.$props.scenario));
-      exportScenario.quests.forEach((el: any, index:number) => {
-              el.order = index;
-            });
-      exportScenario.conversations.forEach((convo: any) => {
-        convo.nodes.forEach((node: any) => {
-          if(node.type == "playerNode")
-          {
-            if(node.data.questId.id > -1)
+
+      if(this.$props.scenario != null)
+      {
+        let exportScenario = JSON.parse(JSON.stringify(this.$props.scenario));
+        exportScenario.quests.forEach((el: any, index:number) => {
+                el.order = index;
+              });
+        exportScenario.conversations.forEach((convo: any) => {
+          convo.nodes.forEach((node: any) => {
+            if(node.type == "playerNode")
             {
-              let q = exportScenario.quests.find((e: types.QuestData) => e.id == node.data.questId.id);
-              if(q != undefined)
-                node.data.questId.id = q.order;
-              else
-                node.data.questId.id = -1;
+              if(node.data.questId.id > -1)
+              {
+                let q = exportScenario.quests.find((e: types.QuestData) => e.id == node.data.questId.id);
+                if(q != undefined)
+                  node.data.questId.id = q.order;
+                else
+                  node.data.questId.id = -1;
+              }
+              delete node.data.quests;
+
+              let temp = node.data.questId.id;
+              delete node.data.questId;
+              node.data.questId = temp;
             }
-            delete node.data.quests;
-
-            let temp = node.data.questId.id;
-            delete node.data.questId;
-            node.data.questId = temp;
-          }
-          else if(node.type == "npcNode")
-          {
-            delete node.data.questId;
-          }
+            else if(node.type == "npcNode")
+            {
+              delete node.data.questId;
+            }
+          })
         })
-      })
 
-      exportScenario.quests.forEach((el: any) => {
-        el.id = el.order;
-        delete el.solved;
-        delete el.order;
-      });
+        exportScenario.quests.forEach((el: any) => {
+          el.id = el.order;
+          delete el.solved;
+          delete el.order;
+        });
 
-      var blob = new Blob([JSON.stringify(exportScenario)], { type: "application/json" })
-      saveAs(blob, filename);
+        var blob = new Blob([JSON.stringify(exportScenario)], { type: "application/json" })
+        saveAs(blob, filename);
+      }
     }
   },
+  onAutoLoad() {
+    let scenario = JSON.parse(localStorage.getItem("dialog-editor-storage")) as types.Scenario;
 
+          scenario.conversations.forEach((item) => {
+            item.nodes.forEach((n) => {
+              let temp: number = n.data.questId;
+              n.data.questId = new types.QuestId(temp);
+            })
+          })
+
+          this.$emit('json-file-loaded', {scenario: scenario, filename: "Auto-Saved dialog"});
+  },
   doSomethingWithTheFile(file: File) {
       let reader = new FileReader();
       reader.onload = e => {
@@ -99,6 +156,8 @@ props: {
   <div class="save__controls">
     <label class="btn" @click="onCreate">Create scenario</label>
     <label class="btn" @click="onSave">Save scenario</label>
+    <label class="btn" @click="onAutoSave">Auto-Save scenario</label>
+    <label class="btn" @click="onAutoLoad">Auto-Load scenario</label>
     <label class="btn">
         <input id="hiddenInput" type="file" @change="onFileChange"/>
         Load scenario
