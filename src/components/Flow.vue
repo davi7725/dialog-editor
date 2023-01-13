@@ -8,13 +8,13 @@ import PlayerNode from './PlayerNode.vue'
 import { Ref } from 'vue'
 import * as types from '../types'
 
-const initialElements: Elements = []
+let initialElements: Map<number, Elements> = new Map<number, Elements>()
 
 
 const { project, onConnect, nodes, edges, addEdges, addNodes,setNodes, setEdges, onEdgesChange, onNodesChange, setTranslateExtent, setState, store, setTransform } = useVueFlow()
 
 let id = 0
-const getId = () => `node${id++}`
+const getId = () => `node${selectedDialogIndex.value}-${id++}`
 let selectedDialogIndex : Ref<number | null> = ref(null)
 
 
@@ -40,8 +40,13 @@ onNodesChange((params) =>
         let index = Scenario.value.conversations[selectedDialogIndex.value as number].nodes.findIndex(function(el) {return el.id == value.id});
         if(index >= 0)
         {
-          Scenario.value.conversations[selectedDialogIndex.value as number].nodes[index].position.x = value.position?.x as number
-          Scenario.value.conversations[selectedDialogIndex.value as number].nodes[index].position.y = value.position?.y as number
+          let n = Scenario.value.conversations[selectedDialogIndex.value as number].nodes[index].position;
+          console.log("old "+n.x+"-"+n.y);
+          
+          console.log("new " + value.position?.x+"-"+value.position?.y)
+          if(value.position?.x != undefined && value.position?.y != undefined)
+            Scenario.value.conversations[selectedDialogIndex.value as number].nodes[index].position = new types.NodePosition(value.position?.x as number, value.position?.y as number)
+
         }
       }
       else if(value.type === 'remove')
@@ -141,13 +146,16 @@ const jsonFileLoaded = (data : any) => {
   Filename.value = null
   Filename.value = data.filename
 
+  initialElements.clear()
+
   if(Scenario.value?.conversations == undefined)
   {
     Scenario.value!.conversations = new Array<types.Conversation>();
   }
 
   Scenario.value?.conversations.forEach((convo: types.Conversation) => {
-    convo.nodes.forEach((node: any) => {
+    convo.nodes.forEach((node: any, index: number) => {
+      initialElements.set(index, [])
       if(node.type == "playerNode")
       {
         node.data.quests = Scenario.value?.quests;
@@ -211,19 +219,24 @@ const dialogSelected = (index: number) => {
 
   id = biggestId + 1;
 
-  const node = Scenario.value?.conversations[index].nodes[0]
+  //const node = Scenario.value?.conversations[index].nodes.find()
 
-  const xpos = Number(node?.position.x)
+  const node = Scenario.value?.conversations[index].nodes.reduce((prev, current) => (prev.position.x < current.position.x) ? prev : current)
+
+  console.log(node?.position?.x)
+  const xpos = Number(node?.position?.x)
   const ypos = Number(node?.position?.y)
 
-   setTransform({ x: xpos || 0, y:ypos || 0, zoom: 1 })
+  console.log(xpos + "-" + ypos)
+
+   setTransform({ x: xpos, y:ypos, zoom: 1 })
 }
 
-const elements = ref(initialElements)
+let elements = ref(initialElements)
 </script>
 <template>
   <div class="dndflow" @drop="onDrop">
-    <VueFlow v-model="elements" @dragover="onDragOver" :node-types="nodeTypes">
+    <VueFlow v-if="selectedDialogIndex != null" v-model="elements[selectedDialogIndex.value]" @dragover="onDragOver" :node-types="nodeTypes">
       <Background :variant="BackgroundVariant.Lines" pattern-color="#4d4d4d" gap="25" />
     </VueFlow>
     

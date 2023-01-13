@@ -39,6 +39,7 @@ const reset = () => {
 defineExpose({ reset });
 
 const setDialog = (dialog: types.Conversation) => {
+  reset();
   selectedDialog = dialog
   selectedDialogIndex.value = dialog.id
 
@@ -103,6 +104,8 @@ const removeDialog = (id: number) => {
   {
     let d = props.scenario.conversations.find((el: types.Conversation) => el.id == id)
     let i = props.scenario.conversations.indexOf(d)
+    let od = props.scenario.conversations.find((el: types.Conversation) => el.id == selectedDialogIndex.value)
+    
     props.scenario.conversations.splice(i,1)
 
     props.scenario.conversations.forEach((value, index) => {
@@ -115,6 +118,8 @@ const removeDialog = (id: number) => {
 
     if(id == selectedDialogIndex.value)
       setDialog(props.scenario.conversations[0]);
+    else
+      setDialog(od);
   }
 }
 

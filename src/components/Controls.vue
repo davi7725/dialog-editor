@@ -11,12 +11,31 @@ interface HTMLInputEvent extends Event {
 <script lang="ts">
 export default {
   inheritAttrs: false,
+  data () {
+	return {
+		polling: 0
+	}
+},
+created () {
+  this.onAutoLoad();
+  //clearInterval(this.polling)
+	//this.pollData()
+},
   methods: {
-  
+  pollData () {
+    console.log("poll data")
+		this.polling = setInterval(() => {
+			this.onAutoSave();
+      console.log("Auto-Saving...");
+		}, 5000)
+	},
   onCreate() 
   {
     let scen = new types.Scenario();
     this.$emit('json-file-loaded', {scenario: scen, filename: "New Scenario.json"});
+    
+    clearInterval(this.polling)
+    this.pollData()
   },
   onFileChange(event: HTMLInputEvent | DragEvent) {
     let files =
@@ -126,6 +145,8 @@ export default {
           })
 
           this.$emit('json-file-loaded', {scenario: scenario, filename: "Auto-Saved dialog"});
+          clearInterval(this.polling)
+          this.pollData()
   },
   doSomethingWithTheFile(file: File) {
       let reader = new FileReader();
@@ -142,6 +163,8 @@ export default {
           })
 
           this.$emit('json-file-loaded', {scenario: scenario, filename: file.name});
+          clearInterval(this.polling)
+          this.pollData()
         }
       };
       reader.readAsText(file)
@@ -156,8 +179,8 @@ props: {
   <div class="save__controls">
     <label class="btn" @click="onCreate">Create scenario</label>
     <label class="btn" @click="onSave">Save scenario</label>
-    <label class="btn" @click="onAutoSave">Auto-Save scenario</label>
-    <label class="btn" @click="onAutoLoad">Auto-Load scenario</label>
+    <!--<label class="btn" @click="onAutoSave">Auto-Save scenario</label>
+    <label class="btn" @click="onAutoLoad">Auto-Load scenario</label>-->
     <label class="btn">
         <input id="hiddenInput" type="file" @change="onFileChange"/>
         Load scenario

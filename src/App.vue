@@ -1,7 +1,5 @@
 <template>
-  <div style="height: 100vh">
     <Flow /> 
-  </div>
 </template>
 
 <script setup lang="ts">
