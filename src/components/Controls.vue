@@ -135,25 +135,62 @@ created () {
     }
   },
   onAutoLoad() {
-    let scenario = JSON.parse(localStorage.getItem("dialog-editor-storage")) as types.Scenario;
+    let save = localStorage.getItem("dialog-editor-storage")
+    if(save != null)
+    {
+      let scenario = JSON.parse(save) as types.Scenario
+        
+      scenario.conversations.forEach((item) => {
+        item.nodes.forEach((n) => {
+          let temp: number = n.data.questId;
+          n.data.questId = new types.QuestId(temp);
+        })
+      })
 
-          scenario.conversations.forEach((item) => {
-            item.nodes.forEach((n) => {
-              let temp: number = n.data.questId;
-              n.data.questId = new types.QuestId(temp);
-            })
-          })
-
-          this.$emit('json-file-loaded', {scenario: scenario, filename: "Auto-Saved dialog"});
-          clearInterval(this.polling)
-          this.pollData()
+      this.$emit('json-file-loaded', {scenario: scenario, filename: "Auto-Saved dialog"});
+      clearInterval(this.polling)
+      this.pollData()
+    }
   },
   doSomethingWithTheFile(file: File) {
       let reader = new FileReader();
       reader.onload = e => {
         if(e.target != null)
         {
-          let scenario = JSON.parse(String(e.target.result)) as types.Scenario;
+          let scenario = JSON.parse(String(e.target.result))
+          
+          //id!: number;
+          //name!: string;
+          scenario.conversations.forEach((item, index) => {
+            if(!item.hasOwnProperty('id'))
+            {
+              item['id'] = index;
+            }
+            
+            if(!item.hasOwnProperty('name'))
+            {
+              item['name'] = "Dialog " + index
+            }
+
+            let nodenamechange = new Map<string,string>()
+
+            item.nodes.forEach((item) => {
+              if(item.id.indexOf('-') == -1)
+              {
+                let nodeid = Number(item.id.substring(4))
+                nodenamechange.set(item.id, "node" + index + "-" + nodeid)
+                item.id = "node" + index + "-" + nodeid
+              }
+            })
+
+            item.edges.forEach((item) => {
+              if(nodenamechange.has(item.source) && nodenamechange.has(item.target))
+              {
+                item.source = nodenamechange.get(item.source)
+                item.target = nodenamechange.get(item.target)
+              }
+            })
+          })
 
           scenario.conversations.forEach((item) => {
             item.nodes.forEach((n) => {

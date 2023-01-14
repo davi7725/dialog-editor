@@ -37,13 +37,15 @@ onNodesChange((params) =>
     {
       if(value.type === 'position')
       {
+        console.log("value")
+        console.log(value.position)
         let index = Scenario.value.conversations[selectedDialogIndex.value as number].nodes.findIndex(function(el) {return el.id == value.id});
         if(index >= 0)
         {
           let n = Scenario.value.conversations[selectedDialogIndex.value as number].nodes[index].position;
           console.log("old "+n.x+"-"+n.y);
           
-          console.log("new " + value.position?.x+"-"+value.position?.y)
+          //console.log("new " + value.position?.x+"-"+value.position?.y)
           if(value.position?.x != undefined && value.position?.y != undefined)
             Scenario.value.conversations[selectedDialogIndex.value as number].nodes[index].position = new types.NodePosition(value.position?.x as number, value.position?.y as number)
 
@@ -213,29 +215,39 @@ const dialogSelected = (index: number) => {
 
   let biggestId = 0;
   Scenario.value?.conversations[index].nodes.forEach((item, index) => {
-    (Number(item.id.substring(4)) > biggestId)
-    biggestId = Number(item.id.substring(4))
+    let subsn = +item.id.indexOf('-') + 1;
+    (Number(item.id.substring(subsn)) > biggestId)
+    biggestId = Number(item.id.substring(subsn))
   })
 
-  id = biggestId + 1;
+  id = +(biggestId as number) + 1;
+  console.log(id);
 
   //const node = Scenario.value?.conversations[index].nodes.find()
 
-  const node = Scenario.value?.conversations[index].nodes.reduce((prev, current) => (prev.position.x < current.position.x) ? prev : current)
+  let xpos = 0
+  let ypos = 0
 
-  console.log(node?.position?.x)
-  const xpos = Number(node?.position?.x)
-  const ypos = Number(node?.position?.y)
+  if(Scenario.value?.conversations[index]?.nodes?.length > 0)
+  {
+    const node = Scenario.value?.conversations[index].nodes.reduce((prev, current) => (prev.position.x < current.position.x) ? prev : current)
 
-  console.log(xpos + "-" + ypos)
+    
+    let inverseX = +node?.position?.x * -1;
+    let inverseY = +node?.position?.y * -1;
 
-   setTransform({ x: xpos, y:ypos, zoom: 1 })
+    xpos = (+inverseX as number) + (+450 as number);
+    ypos = (+inverseY as number) + (+200 as number);
+  }
+
+   setTransform({ x: xpos+250, y:ypos+200, zoom: 1 })
 }
 
 let elements = ref(initialElements)
 </script>
 <template>
   <div class="dndflow" @drop="onDrop">
+    
     <VueFlow v-if="selectedDialogIndex != null" v-model="elements[selectedDialogIndex.value]" @dragover="onDragOver" :node-types="nodeTypes">
       <Background :variant="BackgroundVariant.Lines" pattern-color="#4d4d4d" gap="25" />
     </VueFlow>
