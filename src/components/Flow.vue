@@ -37,15 +37,12 @@ onNodesChange((params) =>
     {
       if(value.type === 'position')
       {
-        console.log("value")
-        console.log(value.position)
         let index = Scenario.value.conversations[selectedDialogIndex.value as number].nodes.findIndex(function(el) {return el.id == value.id});
         if(index >= 0)
         {
           let n = Scenario.value.conversations[selectedDialogIndex.value as number].nodes[index].position;
           console.log("old "+n.x+"-"+n.y);
           
-          //console.log("new " + value.position?.x+"-"+value.position?.y)
           if(value.position?.x != undefined && value.position?.y != undefined)
             Scenario.value.conversations[selectedDialogIndex.value as number].nodes[index].position = new types.NodePosition(value.position?.x as number, value.position?.y as number)
 
@@ -127,9 +124,13 @@ const onDrop = (event: DragEvent) => {
     } as unknown as Node
     addNodes([newNode])
 
-    let node = new types.ConversationNode(nodeId, new types.NodePosition(event.clientX, event.clientY -40), type, nodeClass, new types.NodeData(npcName, nodeClass,texts, triggers, false, questId))
+    console.log(newNode)
+
+    let node = new types.ConversationNode(nodeId, new types.NodePosition(position.x, position.y), type, nodeClass, new types.NodeData(npcName, nodeClass,texts, triggers, false, questId))
     node.data.quests = Scenario.value?.quests;
     Scenario.value?.conversations[selectedDialogIndex.value as number].nodes.push(node)
+    
+    console.log(node)
 }
 
 const nodeTypes = {
@@ -221,7 +222,6 @@ const dialogSelected = (index: number) => {
   })
 
   id = +(biggestId as number) + 1;
-  console.log(id);
 
   //const node = Scenario.value?.conversations[index].nodes.find()
 
@@ -238,6 +238,9 @@ const dialogSelected = (index: number) => {
 
     xpos = (+inverseX as number) + (+450 as number);
     ypos = (+inverseY as number) + (+200 as number);
+
+    console.log("positions")
+    console.log(xpos+"-"+ypos)
   }
 
    setTransform({ x: xpos+250, y:ypos+200, zoom: 1 })
