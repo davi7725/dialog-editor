@@ -23,7 +23,6 @@ created () {
 },
   methods: {
   pollData () {
-    console.log("poll data")
 		this.polling = setInterval(() => {
 			this.onAutoSave();
       console.log("Auto-Saving...");
