@@ -38,15 +38,23 @@ const reset = () => {
 
 defineExpose({ reset });
 
-const setDialog = (dialog: types.Conversation) => {
-  reset();
+const setDialog = (dialog: types.Conversation, change: boolean = true) => {
+  if(change)
+    reset();
+
   selectedDialog = dialog
   selectedDialogIndex.value = dialog.id
 
+  console.log(dialog)
+
   emit('dialogSelected', dialog.id);
+
   
-  setNodes(dialog.nodes)
-  setEdges(dialog.edges)
+  if(change)
+  {  
+    setNodes(dialog.nodes)
+    setEdges(dialog.edges)
+  }
 }
 
 const addDialog = () => {
@@ -66,10 +74,29 @@ const addDialog = () => {
 const addNPC = () => {
   if(selectedDialog != null)
   {
+    console.log(selectedDialog)
     let actor =  prompt("Please enter the new NPC name", "") as string;
     selectedDialog.actors?.push(actor)
   }
 }
+
+const checkConvoMove = (evt: any) => {
+
+  /*console.log(evt.newIndex)
+  let id = evt.newIndex;*/
+  if(props.scenario != null)
+  {
+    let od = props.scenario.conversations.find((el: types.Conversation) => el.id == selectedDialogIndex.value)
+    
+    props.scenario.conversations.forEach((value, index) => {
+      value.id = index
+    })
+
+    if(od != null)
+      setDialog(od, false);
+  }
+}
+
 
 const addQuest = () => {
   if(props.scenario != null)
@@ -178,7 +205,7 @@ watch(()=>bus.value.get('questChange'), (val) => {
       <aside v-if="scenario != null"> 
           <div class="description">Here you can select the dialogs from this scenario</div>
           <hr>
-          <draggable class="list-container" :list="scenario.conversations " item-key="id" handle=".handle">
+          <draggable class="list-container" :list="scenario.conversations " item-key="id" handle=".handle"  @end="checkConvoMove">
           <template #item="{element}">
             <div class="list-item">
               <font-awesome-icon icon="grip" class="handle" />
