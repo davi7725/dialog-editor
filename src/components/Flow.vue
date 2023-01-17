@@ -11,7 +11,11 @@ import * as types from '../types'
 let initialElements: Map<number, Elements> = new Map<number, Elements>()
 
 
-const { project, onConnect, nodes, edges, addEdges, addNodes,setNodes, setEdges, onEdgesChange, onNodesChange, setTranslateExtent, setState, store, setTransform } = useVueFlow()
+const { selectionKeyCode, project, onConnect, nodes, edges, addEdges, addNodes,setNodes, setEdges, onEdgesChange, onNodesChange, setTranslateExtent, setState, store, setTransform } = useVueFlow()
+
+onMounted(() => {
+  selectionKeyCode.value = null
+})
 
 let id = 0
 const getId = () => `node${selectedDialogIndex.value}-${id++}`
